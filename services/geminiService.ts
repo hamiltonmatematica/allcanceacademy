@@ -12,7 +12,7 @@ Conecte conteúdos a exemplos de vendas, atendimento, liderança e conformidade.
 
 export const getAIResponse = async (prompt: string, context: string) => {
   const model = ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-1.5-flash',
     contents: `Contexto do treinamento:\n${context}\n\nPergunta do Usuário: ${prompt}`,
     config: {
       systemInstruction: SYSTEM_INSTRUCTION,
@@ -25,7 +25,7 @@ export const getAIResponse = async (prompt: string, context: string) => {
 
 export const generateQuiz = async (topic: string, context: string): Promise<QuizQuestion[]> => {
   const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-1.5-flash',
     contents: `Gere 3 perguntas de múltipla escolha sobre: ${topic}. Contexto: ${context}`,
     config: {
       systemInstruction: SYSTEM_INSTRUCTION,

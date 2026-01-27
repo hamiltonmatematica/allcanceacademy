@@ -43,63 +43,36 @@ const ChatTool: React.FC = () => {
         setIsLoading(true);
 
         try {
-            // Call OpenAI API through your backend or directly
-            // Note: You'll need to set up VITE_OPENAI_API_KEY environment variable
-            const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+            // Build context from previous messages to maintain history
+            const conversationContext = messages
+                .map(msg => `${msg.role === 'user' ? 'Usuário' : 'MentorIA'}: ${msg.content}`)
+                .join('\n');
 
-            if (!apiKey) {
-                throw new Error('API Key não configurada. Configure VITE_OPENAI_API_KEY no arquivo .env');
+            // Import dynamically to avoid circular dependency issues if any, 
+            // though standard import at top is better. 
+            // We'll trust the import added at the top.
+            const { getAIResponse } = await import('../../services/geminiService');
+
+            const responseText = await getAIResponse(userMessage.content, conversationContext);
+
+            if (!responseText) {
+                throw new Error('Sem resposta da IA');
             }
 
-            const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`,
-                },
-                body: JSON.stringify({
-                    model: 'gpt-4',
-                    messages: [
-                        {
-                            role: 'system',
-                            content: `Você é um especialista em Arquitetura Organizacional e Governança. 
-              Seu papel é ajudar profissionais a entenderem conceitos de estrutura organizacional, 
-              governança corporativa, gestão horizontal, tomada de decisões distribuídas, e processos empresariais.
-              Seja claro, objetivo e forneça exemplos práticos quando apropriado.`,
-                        },
-                        ...messages.map((msg) => ({
-                            role: msg.role,
-                            content: msg.content,
-                        })),
-                        {
-                            role: 'user',
-                            content: userMessage.content,
-                        },
-                    ],
-                    temperature: 0.7,
-                    max_tokens: 2000,
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Erro na API da OpenAI');
-            }
-
-            const data = await response.json();
             const assistantMessage: Message = {
                 id: (Date.now() + 1).toString(),
                 role: 'assistant',
-                content: data.choices[0].message.content,
+                content: responseText,
                 timestamp: Date.now(),
             };
 
             setMessages((prev) => [...prev, assistantMessage]);
         } catch (error) {
-            console.error('Error calling OpenAI:', error);
+            console.error('Error calling Gemini:', error);
             const errorMessage: Message = {
                 id: (Date.now() + 1).toString(),
                 role: 'assistant',
-                content: 'Desculpe, ocorreu um erro ao processar sua mensagem. Certifique-se de que a API Key está configurada corretamente no arquivo .env',
+                content: 'Desculpe, ocorreu um erro ao processar sua mensagem. Verifique a configuração da API Key do Google Gemini.',
                 timestamp: Date.now(),
             };
             setMessages((prev) => [...prev, errorMessage]);
