@@ -32,7 +32,7 @@ const AudioTool: React.FC = () => {
 
                         {/* Audio Player */}
                         <audio controls className="w-full">
-                            <source src="/audio_Arquitetura Organizacional e Governança.m4a" type="audio/mp4" />
+                            <source src="/audio_aula.m4a" type="audio/mp4" />
                             Seu navegador não suporta o elemento de áudio.
                         </audio>
 

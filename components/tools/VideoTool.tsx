@@ -55,7 +55,7 @@ const VideoTool: React.FC = () => {
                             onPlay={handleVideoPlay}
                             onPause={handleVideoPause}
                         >
-                            <source src="/video_Arquitetura Organizacional e Governança.mp4" type="video/mp4" />
+                            <source src="/video_aula.mp4" type="video/mp4" />
                             Seu navegador não suporta vídeo HTML5.
                         </video>
 
