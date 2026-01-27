@@ -1,6 +1,6 @@
 {
   "name": "MentorIA: Coaching Corporativo",
-  "description": "Uma plataforma de aprendizagem estilo notebook com um coach de IA integrado para treinamentos corporativos, simulações de role-play, quizzes e flashcards.",
+  "description": "Sua plataforma de desenvolvimento corporativo impulsionada por inteligência artificial. Selecione seu departamento para iniciar a jornada personalizada.",
   "requestFramePermissions": [
     "microphone",
     "camera"
