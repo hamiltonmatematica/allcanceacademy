@@ -51,7 +51,7 @@ const ChatTool: React.FC = () => {
             // Import dynamically to avoid circular dependency issues if any, 
             // though standard import at top is better. 
             // We'll trust the import added at the top.
-            const { getAIResponse } = await import('../../services/geminiService');
+            const { getAIResponse } = await import('../../services/openaiService');
 
             const responseText = await getAIResponse(userMessage.content, conversationContext);
 
@@ -68,11 +68,11 @@ const ChatTool: React.FC = () => {
 
             setMessages((prev) => [...prev, assistantMessage]);
         } catch (error) {
-            console.error('Error calling Gemini:', error);
+            console.error('Error calling OpenAI:', error);
             const errorMessage: Message = {
                 id: (Date.now() + 1).toString(),
                 role: 'assistant',
-                content: 'Desculpe, ocorreu um erro ao processar sua mensagem. Verifique a configuração da API Key do Google Gemini.',
+                content: 'Desculpe, ocorreu um erro ao processar sua mensagem. Verifique a configuração da API Key da OpenAI.',
                 timestamp: Date.now(),
             };
             setMessages((prev) => [...prev, errorMessage]);
