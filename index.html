@@ -7,7 +7,7 @@
   <meta name="description"
     content="Sua plataforma de desenvolvimento corporativo impulsionada por inteligência artificial. Selecione seu departamento para iniciar a jornada personalizada.">
   <title>Allcance Academy - Coaching Corporativo</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -17,7 +17,24 @@
             'brand-dark': '#0B1E28',
             'brand-light': '#E6F0EE',
             'brand-accent': '#2A9D8F'
-          }
+          },
+          typography: {
+            DEFAULT: {
+              css: {
+                maxWidth: '100%',
+                color: '#334155',
+                h1: { color: '#0f172a' },
+                h2: { color: '#0f172a', marginTop: '1.5em', marginBottom: '0.5em' },
+                h3: { color: '#0f172a', marginTop: '1.2em', marginBottom: '0.4em' },
+                strong: { color: '#0f172a' },
+                li: { marginTop: '0.25em', marginBottom: '0.25em' },
+                'ul > li': { paddingLeft: '0.5em' },
+                'ol > li': { paddingLeft: '0.5em' },
+                code: { color: '#be185d' },
+                pre: { backgroundColor: '#f1f5f9', color: '#1e293b' },
+              },
+            },
+          },
         }
       }
     }
@@ -26,6 +43,26 @@
     body {
       font-family: 'Inter', sans-serif;
       background-color: #f8fafc;
+    }
+
+    /* Custom Chat Formatting */
+    .prose h2, .prose h3 {
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .prose p {
+      margin-bottom: 1.25em;
+      line-height: 1.75;
+    }
+
+    .prose ul, .prose ol {
+      margin-top: 1em;
+      margin-bottom: 1em;
+    }
+
+    .prose li {
+      margin-bottom: 0.5em;
     }
 
     .notebook-scroll::-webkit-scrollbar {

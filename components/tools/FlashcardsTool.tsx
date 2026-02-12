@@ -95,7 +95,7 @@ const FlashcardsTool: React.FC = () => {
                 {/* Header inside scrollable area */}
                 <div className="pb-6 border-b border-emerald-200 mb-8">
                     <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">
-                        Flashcards - Gestão Horizontal
+                        Flashcards - Gestão & Estratégia
                     </h2>
                     <p className="text-sm text-slate-600 mt-2">
                         {flashcards.length} cards • {currentIndex + 1} de {flashcards.length}

@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface Message {
     id: string;
@@ -7,16 +9,50 @@ interface Message {
     timestamp: number;
 }
 
+const PROMPT_MODES = [
+    {
+        id: 'executive',
+        label: 'Executivo',
+        icon: '💼',
+        instruction: 'Responda com profundidade executiva, estruturando em: Diagnóstico, Riscos, Arquitetura proposta, Indicadores, Cadência de governança e Plano de execução (120/180/360 dias). Considere nível Conselho/Diretoria. Evite superficialidade.'
+    },
+    {
+        id: 'institutional',
+        label: 'Institucional',
+        icon: '🏛️',
+        instruction: 'Responda como especialista sênior em governança e estratégia. Estruture em: Enquadramento do problema, Causas estruturais, Riscos invisíveis, Arquitetura organizacional recomendada, Modelo de indicadores (KPIs e KRIs), Estrutura de decisão (RACI, Alçadas, Gates) e Próximas 3 ações claras. Linguagem executiva e institucional.'
+    },
+    {
+        id: 'operational',
+        label: 'Operacional',
+        icon: '⚙️',
+        instruction: 'Estruture a resposta como um plano prático, com: Etapas numeradas, Responsáveis, Indicadores, Riscos, Prazo e Resultado esperado.'
+    },
+    {
+        id: 'theoretical',
+        label: 'Teórico',
+        icon: '📜',
+        instruction: 'Responda com rigor conceitual, citando fundamentos teóricos, diferenciações conceituais e aplicações práticas. Evite superficialidade.'
+    },
+    {
+        id: 'critical',
+        label: 'Analítico',
+        icon: '📊',
+        instruction: 'Analise criticamente o texto/pergunta abaixo. Identifique: Fragilidades estruturais, Incoerências estratégicas, Riscos implícitos, Pontos fortes e Ajustes recomendados.'
+    }
+];
+
 const ChatTool: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([
         {
             id: '1',
             role: 'assistant',
-            content: 'Olá! Sou especialista em Arquitetura Organizacional e Governança. Como posso ajudá-lo hoje?',
+            content: 'Olá! Sou o NEXUS, seu especialista em Planejamento Estratégico, Governança Corporativa e Arquitetura Organizacional. Como um consultor sênior, estou aqui para elevar o nível da nossa conversa. Como posso ajudá-lo hoje?',
             timestamp: Date.now(),
         },
     ]);
     const [input, setInput] = useState('');
+    const [activeMode, setActiveMode] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -30,6 +66,11 @@ const ChatTool: React.FC = () => {
 
     const handleSend = async () => {
         if (!input.trim() || isLoading) return;
+
+        const modeInfo = activeMode ? PROMPT_MODES.find(m => m.id === activeMode) : null;
+        const finalPrompt = modeInfo
+            ? `${modeInfo.instruction}\n\nPERGUNTA DO USUÁRIO: ${input.trim()}`
+            : input.trim();
 
         const userMessage: Message = {
             id: Date.now().toString(),
@@ -48,12 +89,9 @@ const ChatTool: React.FC = () => {
                 .map(msg => `${msg.role === 'user' ? 'Usuário' : 'MentorIA'}: ${msg.content}`)
                 .join('\n');
 
-            // Import dynamically to avoid circular dependency issues if any, 
-            // though standard import at top is better. 
-            // We'll trust the import added at the top.
             const { getAIResponse } = await import('../../services/openaiService');
 
-            const responseText = await getAIResponse(userMessage.content, conversationContext);
+            const responseText = await getAIResponse(finalPrompt, conversationContext);
 
             if (!responseText) {
                 throw new Error('Sem resposta da IA');
@@ -96,10 +134,10 @@ const ChatTool: React.FC = () => {
                 {/* Header inside scrollable area */}
                 <div className="pb-6 border-b border-emerald-200 mb-6">
                     <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">
-                        Chat com IA Especializada
+                        NEXUS - Especialista em Governança e Estratégia
                     </h2>
                     <p className="text-sm text-slate-600 mt-2">
-                        Converse sobre Arquitetura Organizacional e Governança
+                        Consultoria Sênior em Planejamento, Governança e Arquitetura Organizacional
                     </p>
                 </div>
 
@@ -109,12 +147,16 @@ const ChatTool: React.FC = () => {
                         className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                         <div
-                            className={`max-w-[80%] rounded-2xl px-6 py-4 shadow-md ${message.role === 'user'
+                            className={`max-w-[90%] rounded-2xl px-8 py-6 shadow-md ${message.role === 'user'
                                 ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white'
                                 : 'bg-white text-slate-800'
                                 }`}
                         >
-                            <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                            <div className={`prose prose-base max-w-none ${message.role === 'user' ? 'text-white prose-headings:text-white prose-strong:text-white' : 'text-slate-800'}`}>
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                    {message.content}
+                                </ReactMarkdown>
+                            </div>
                             <span
                                 className={`text-xs mt-2 block ${message.role === 'user' ? 'text-emerald-100' : 'text-slate-400'
                                     }`}
@@ -143,12 +185,33 @@ const ChatTool: React.FC = () => {
 
             {/* Input Area */}
             <div className="p-6 border-t border-emerald-200 bg-white/80 backdrop-blur-sm">
+
+                {/* Prompt Modes Selection */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                    {PROMPT_MODES.map((mode) => (
+                        <button
+                            key={mode.id}
+                            onClick={() => setActiveMode(activeMode === mode.id ? null : mode.id)}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold transition-all border ${activeMode === mode.id
+                                    ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg'
+                                    : 'bg-white border-emerald-200 text-emerald-700 hover:border-emerald-400'
+                                }`}
+                        >
+                            <span>{mode.icon}</span>
+                            {mode.label}
+                        </button>
+                    ))}
+                </div>
+
                 <div className="flex gap-3">
                     <textarea
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyPress={handleKeyPress}
-                        placeholder="Digite sua pergunta sobre governança e arquitetura organizacional..."
+                        placeholder={activeMode
+                            ? `Modo ${PROMPT_MODES.find(m => m.id === activeMode)?.label} ativado. Digite sua pergunta...`
+                            : "Digite sua pergunta sobre estratégia, governança e arquitetura..."
+                        }
                         className="flex-1 px-4 py-3 border-2 border-emerald-200 rounded-xl focus:outline-none focus:border-emerald-500 resize-none transition-colors"
                         rows={2}
                         disabled={isLoading}
