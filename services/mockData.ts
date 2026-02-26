@@ -1,12 +1,18 @@
 
-import { BlockType, ContentBlock } from '../types';
+import { BlockType, ContentBlock, Step, QuizQuestion, Flashcard } from '../types';
+
+export interface MindMapNodeData {
+    id: string;
+    label: string;
+    children?: MindMapNodeData[];
+}
 
 export type SectorType = 'FINANCEIRO' | 'RH' | 'ARQUITETURA';
 
 export const SECTORS: { id: SectorType; label: string; icon: string; description: string; available: boolean }[] = [
     {
         id: 'ARQUITETURA',
-        label: 'Arquitetura Organizacional e Governança',
+        label: 'Faculdade de gestão horizontal',
         icon: 'building',
         description: 'Estrutura organizacional, processos e governança corporativa.',
         available: true
@@ -23,7 +29,7 @@ export const SECTORS: { id: SectorType; label: string; icon: string; description
         label: 'Recursos Humanos',
         icon: 'users',
         description: 'Gestão de Pessoas, Cultura e Recrutamento.',
-        available: false
+        available: true
     },
 ];
 
@@ -93,7 +99,7 @@ export const GET_INITIAL_BLOCKS = (sector: SectorType): ContentBlock[] => {
                 {
                     id: 'arq-1',
                     type: BlockType.TEXT,
-                    title: 'Introdução à Arquitetura Organizacional',
+                    title: 'Introdução à Faculdade de gestão horizontal',
                     content: 'A arquitetura organizacional define como sua empresa estrutura equipes, processos e sistemas para atingir seus objetivos estratégicos. Uma boa governança garante transparência, responsabilidade e alinhamento.'
                 },
                 {
@@ -131,12 +137,23 @@ export const GET_AI_CONTEXT = (sector: SectorType): string => {
       Tom: Formal, preciso, analítico.
       Instrução: Ajude o usuário a entender termos técnicos e processos financeiros complexos.`;
         case 'RH':
-            return `Você é um mentor especialista em Recursos Humanos e Gestão de Pessoas.
-      Foco: Recrutamento, Cultura, Liderança, Feedback, Treinamento.
-      Tom: Empático, motivador, profissional.
-      Instrução: Oriente sobre soft skills e gestão de conflitos.`;
+            return `Você é uma inteligência especializada em Human Systems Intelligence. Você não é um consultor comum, mas sim um "Human Capital Architect" de nível PhD que integra as bases de Harvard, MIT, Stanford, Oxford e Cambridge.
+      
+      PERSONALIDADE E CIÊNCIA:
+      - Atue como um arquiteto de sistemas humanos de alta performance.
+      - Utilize rigorosamente o Método Científico e Psicologia Organizacional para diagnóstico.
+      - Foque em Desenvolvimento de Liderança, Cultura e Inteligência Comportamental.
+      - Use ferramentas como 5W2H, People Analytics e Matriz de Decisão Comportamental.
+      
+      OBJETIVOS:
+      - Arquitetura de Papéis: Definir responsabilidades com clareza e alinhamento ao capital humano.
+      - Saúde Organizacional: Mitigar riscos invisíveis em sistemas de pessoas e cultura.
+      - Decisões Baseadas em Dados: Aplicar People Analytics para eliminar subjetividade.
+      
+      Tom: Estratégico, cirúrgico, tecnicamente denso e focado em PESSOAS. 
+      REGRAS: Nunca fale sobre "Governança Corporativa" ou "Arquitetura Organizacional master", pois estes são temas de outro setor. Foque 100% em Capital Humano e Sistemas de Pessoas.`;
         case 'ARQUITETURA':
-            return `Você é um mentor especialista em Arquitetura Organizacional e Governança Corporativa.
+            return `Você é um mentor especialista em Faculdade de gestão horizontal.
       Foco: Estrutura organizacional, Design organizacional, Governança, Processos, Compliance.
       Tom: Estratégico, consultivo, estruturado.
       Instrução: Ajude a entender frameworks organizacionais, melhores práticas de governança e estruturação de processos.`;
@@ -144,8 +161,6 @@ export const GET_AI_CONTEXT = (sector: SectorType): string => {
             return '';
     }
 };
-
-import { Step, QuizQuestion } from '../types';
 
 export const GET_STEPS = (sector: SectorType): Step[] => {
     switch (sector) {
@@ -224,3 +239,99 @@ export const GET_STEPS = (sector: SectorType): Step[] => {
             return [];
     }
 };
+
+export const GET_MINDMAP_DATA = (sector: SectorType): MindMapNodeData => {
+    switch (sector) {
+        case 'ARQUITETURA':
+            return {
+                id: 'root',
+                label: 'FACULDADE DE GESTÃO HORIZONTAL',
+                children: [
+                    {
+                        id: 'n1',
+                        label: 'ORDEM ESTRUTURAL',
+                        children: [
+                            { id: 'n1-1', label: 'Clareza Organizacional' },
+                            { id: 'n1-2', label: 'Mecanismos de Decisão' },
+                        ],
+                    },
+                    {
+                        id: 'n2',
+                        label: 'ARQUITETURA ESTRATÉGICA',
+                        children: [
+                            { id: 'n2-1', label: 'Diagnóstico Sistêmico' },
+                            { id: 'n2-2', label: 'Roadmap de Execução' },
+                        ],
+                    },
+                ],
+            };
+        case 'RH':
+            return {
+                id: 'root-rh',
+                label: 'NEXUS HR - HUMAN SYSTEMS',
+                children: [
+                    {
+                        id: 'rh1',
+                        label: 'ARQUITETURA DE PAPÉIS',
+                        children: [
+                            { id: 'rh1-1', label: 'Definição de Responsabilidades' },
+                            { id: 'rh1-2', label: 'Matriz RACI' },
+                        ],
+                    },
+                    {
+                        id: 'rh2',
+                        label: 'SAÚDE ORGANIZACIONAL',
+                        children: [
+                            { id: 'rh2-1', label: 'Clima e Engajamento' },
+                            { id: 'rh2-2', label: 'Mitigação de Conflitos' },
+                        ],
+                    },
+                ],
+            };
+        default:
+            return { id: 'default', label: 'CONTEÚDO INDISPONÍVEL' };
+    }
+};
+
+export const GET_FLASHCARDS_DATA = (sector: SectorType): Flashcard[] => {
+    switch (sector) {
+        case 'ARQUITETURA':
+            return [
+                { id: '1', front: 'O que é Gestão Horizontal?', back: 'Modelo que prioriza a autonomia e a colaboração sobre a hierarquia rígida.' },
+                { id: '2', front: 'O que é Governança Corporativa?', back: 'Sistema que dirige e monitora a organização.' }
+            ];
+        case 'RH':
+            return [
+                { id: '3', front: 'O que é Human Systems Intelligence?', back: 'Integração de ciência comportamental com arquitetura de processos humanos.' },
+                { id: '4', front: 'Qual o papel do Human Capital Architect?', back: 'Desenhar sistemas que equilibram produtividade e saúde organizacional.' }
+            ];
+        default:
+            return [];
+    }
+};
+
+export const GET_MODULE_METADATA = (sector: SectorType) => {
+    switch (sector) {
+        case 'ARQUITETURA':
+            return {
+                videoTitle: 'Aula: Faculdade de gestão horizontal',
+                videoDesc: 'Assista ao conteúdo estratégico sobre gestão moderna e horizontal.',
+                audioTitle: 'Áudio: Gestão Horizontal',
+                audioDesc: 'Resumo executivo em áudio.'
+            };
+        case 'RH':
+            return {
+                videoTitle: 'Aula: Nexus HR – Human Intelligence',
+                videoDesc: 'Exploração técnica sobre arquitetura de sistemas humanos.',
+                audioTitle: 'Áudio: Nexus HR Podcast',
+                audioDesc: 'Insights sobre saúde e estrutura organizacional.'
+            };
+        default:
+            return {
+                videoTitle: 'Módulo Indisponível',
+                videoDesc: '',
+                audioTitle: '',
+                audioDesc: ''
+            };
+    }
+}

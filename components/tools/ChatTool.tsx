@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { SectorType, SECTORS, GET_AI_CONTEXT } from '../../services/mockData';
 
 interface Message {
     id: string;
@@ -9,45 +10,63 @@ interface Message {
     timestamp: number;
 }
 
-const PROMPT_MODES = [
-    {
-        id: 'executive',
-        label: 'Executivo',
-        icon: '💼',
-        instruction: 'Responda com profundidade executiva, estruturando em: Diagnóstico, Riscos, Arquitetura proposta, Indicadores, Cadência de governança e Plano de execução (120/180/360 dias). Considere nível Conselho/Diretoria. Evite superficialidade.'
-    },
-    {
-        id: 'institutional',
-        label: 'Institucional',
-        icon: '🏛️',
-        instruction: 'Responda como especialista sênior em governança e estratégia. Estruture em: Enquadramento do problema, Causas estruturais, Riscos invisíveis, Arquitetura organizacional recomendada, Modelo de indicadores (KPIs e KRIs), Estrutura de decisão (RACI, Alçadas, Gates) e Próximas 3 ações claras. Linguagem executiva e institucional.'
-    },
-    {
-        id: 'operational',
-        label: 'Operacional',
-        icon: '⚙️',
-        instruction: 'Estruture a resposta como um plano prático, com: Etapas numeradas, Responsáveis, Indicadores, Riscos, Prazo e Resultado esperado.'
-    },
-    {
-        id: 'theoretical',
-        label: 'Teórico',
-        icon: '📜',
-        instruction: 'Responda com rigor conceitual, citando fundamentos teóricos, diferenciações conceituais e aplicações práticas. Evite superficialidade.'
-    },
-    {
-        id: 'critical',
-        label: 'Analítico',
-        icon: '📊',
-        instruction: 'Analise criticamente o texto/pergunta abaixo. Identifique: Fragilidades estruturais, Incoerências estratégicas, Riscos implícitos, Pontos fortes e Ajustes recomendados.'
-    }
-];
+interface ChatToolProps {
+    sector?: SectorType;
+}
 
-const ChatTool: React.FC = () => {
+const GET_PROMPT_MODES = (sector?: SectorType) => {
+    const isRH = sector === 'RH';
+    return [
+        {
+            id: 'executive',
+            label: 'Planejamento',
+            icon: '💼',
+            instruction: isRH
+                ? 'Responda com profundidade técnica em Capital Humano, estruturando em: Diagnóstico de Sistemas Humanos, Riscos de Saúde Organizacional, Arquitetura de Papéis proposta, Indicadores de Performance (KPIs) e Plano de Execução (30/60/90 dias). Considere nível Diretor de RH/CHRO. Evite superficialidade.'
+                : 'Responda com profundidade executiva, estruturando em: Diagnóstico, Riscos, Arquitetura proposta, Indicadores, Cadência de governança e Plano de execução (120/180/360 dias). Considere nível Conselho/Diretoria. Evite superficialidade.'
+        },
+        {
+            id: 'institutional',
+            label: 'Sistemas',
+            icon: '🏛️',
+            instruction: isRH
+                ? 'Responda como Arquiteto de Capital Humano sênior. Estruture em: Enquadramento do Problema Humano, Causas Comportamentais/Sistêmicas, Riscos Organizacionais Invisíveis, Arquitetura de Sistemas Recomendada, Matriz RACI de Responsabilidades e Próximas 3 ações claras. Linguagem técnica e acadêmica de alto nível.'
+                : 'Responda como especialista sênior em governança e estratégia. Estruture em: Enquadramento do problema, Causas estruturais, Riscos invisíveis, Arquitetura organizacional recomendada, Modelo de indicadores (KPIs e KRIs), Estrutura de decisão (RACI, Alçadas, Gates) e Próximas 3 ações claras. Linguagem executiva e institucional.'
+        },
+        {
+            id: 'operational',
+            label: 'Operacional',
+            icon: '⚙️',
+            instruction: 'Estruture a resposta como um plano prático e tático, com: Etapas numeradas, Responsáveis diretos, Indicadores de sucesso, Riscos operacionais e Resultado esperado imediato.'
+        },
+        {
+            id: 'theoretical',
+            label: 'Conceitos',
+            icon: '📜',
+            instruction: isRH
+                ? 'Responda com rigor acadêmico, citando fundamentos de Psicologia Organizacional, Teoria de Sistemas e Ciência Comportamental de Harvard/MIT/Stanford. Foque na fundamentação teórica do Capital Humano.'
+                : 'Responda com rigor conceitual, citando fundamentos teóricos, diferenciações conceituais e aplicações práticas de Governança e Estratégia Moderna.'
+        },
+        {
+            id: 'critical',
+            label: 'Analítico',
+            icon: '📊',
+            instruction: 'Analise criticamente o texto/pergunta abaixo. Identifique: Fragilidades estruturais, Incoerências no desenho de processos, Riscos implícitos ao sistema e Ajustes recomendados de curto prazo.'
+        }
+    ];
+};
+
+const ChatTool: React.FC<ChatToolProps> = ({ sector }) => {
+    const sectorData = SECTORS.find(s => s.id === sector);
+    const aiContext = sector ? GET_AI_CONTEXT(sector) : '';
+
     const [messages, setMessages] = useState<Message[]>([
         {
             id: '1',
             role: 'assistant',
-            content: 'Olá! Sou o NEXUS, seu especialista em Planejamento Estratégico, Governança Corporativa e Arquitetura Organizacional. Como um consultor sênior, estou aqui para elevar o nível da nossa conversa. Como posso ajudá-lo hoje?',
+            content: sector === 'RH'
+                ? 'Olá! Estou aqui para elevar o nível da nossa conversa sobre sistemas humanos e saúde organizacional com o máximo rigor técnico. Como posso ajudar você hoje?'
+                : `Olá! Como um consultor sênior da ${sectorData?.label || 'Estratégia'}, estou aqui para elevar o nível da nossa conversa. Como posso ajudá-lo hoje?`,
             timestamp: Date.now(),
         },
     ]);
@@ -55,6 +74,8 @@ const ChatTool: React.FC = () => {
     const [activeMode, setActiveMode] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    const promptModes = GET_PROMPT_MODES(sector);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -67,7 +88,7 @@ const ChatTool: React.FC = () => {
     const handleSend = async () => {
         if (!input.trim() || isLoading) return;
 
-        const modeInfo = activeMode ? PROMPT_MODES.find(m => m.id === activeMode) : null;
+        const modeInfo = activeMode ? promptModes.find(m => m.id === activeMode) : null;
         const finalPrompt = modeInfo
             ? `${modeInfo.instruction}\n\nPERGUNTA DO USUÁRIO: ${input.trim()}`
             : input.trim();
@@ -91,7 +112,7 @@ const ChatTool: React.FC = () => {
 
             const { getAIResponse } = await import('../../services/openaiService');
 
-            const responseText = await getAIResponse(finalPrompt, conversationContext);
+            const responseText = await getAIResponse(finalPrompt, conversationContext, aiContext, sector);
 
             if (!responseText) {
                 throw new Error('Sem resposta da IA');
@@ -130,26 +151,28 @@ const ChatTool: React.FC = () => {
         <div className="h-full flex flex-col bg-gradient-to-br from-emerald-50 to-teal-50 overflow-hidden">
 
             {/* Messages Area with Header embedded */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 premium-scroll">
                 {/* Header inside scrollable area */}
                 <div className="pb-6 border-b border-emerald-200 mb-6">
                     <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">
-                        NEXUS - Especialista em Governança e Estratégia
+                        {sectorData?.label}
                     </h2>
                     <p className="text-sm text-slate-600 mt-2">
-                        Consultoria Sênior em Planejamento, Governança e Arquitetura Organizacional
+                        {sector === 'RH'
+                            ? 'Inteligência Estratégica em Sistemas Humanos, Gestão Horizontal e Saúde Organizacional'
+                            : 'Consultoria Sênior em Planejamento, Governança e Arquitetura Organizacional'}
                     </p>
                 </div>
 
                 {messages.map((message) => (
                     <div
                         key={message.id}
-                        className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                        className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} animate-premium-in`}
                     >
                         <div
-                            className={`max-w-[90%] rounded-2xl px-8 py-6 shadow-md ${message.role === 'user'
-                                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white'
-                                : 'bg-white text-slate-800'
+                            className={`max-w-[85%] rounded-2xl px-6 py-5 shadow-sm border ${message.role === 'user'
+                                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-emerald-500/20 shadow-emerald-500/10'
+                                : 'bg-white text-slate-800 border-slate-100 shadow-slate-200/50'
                                 }`}
                         >
                             <div className={`prose prose-base max-w-none ${message.role === 'user' ? 'text-white prose-headings:text-white prose-strong:text-white' : 'text-slate-800'}`}>
@@ -184,17 +207,17 @@ const ChatTool: React.FC = () => {
             </div>
 
             {/* Input Area */}
-            <div className="p-6 border-t border-emerald-200 bg-white/80 backdrop-blur-sm">
+            <div className="p-6 border-t border-emerald-500/10 glass-effect relative z-20">
 
                 {/* Prompt Modes Selection */}
                 <div className="flex flex-wrap gap-2 mb-4">
-                    {PROMPT_MODES.map((mode) => (
+                    {promptModes.map((mode) => (
                         <button
                             key={mode.id}
                             onClick={() => setActiveMode(activeMode === mode.id ? null : mode.id)}
                             className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold transition-all border ${activeMode === mode.id
-                                    ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg'
-                                    : 'bg-white border-emerald-200 text-emerald-700 hover:border-emerald-400'
+                                ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg'
+                                : 'bg-white border-emerald-200 text-emerald-700 hover:border-emerald-400'
                                 }`}
                         >
                             <span>{mode.icon}</span>
@@ -209,10 +232,10 @@ const ChatTool: React.FC = () => {
                         onChange={(e) => setInput(e.target.value)}
                         onKeyPress={handleKeyPress}
                         placeholder={activeMode
-                            ? `Modo ${PROMPT_MODES.find(m => m.id === activeMode)?.label} ativado. Digite sua pergunta...`
-                            : "Digite sua pergunta sobre estratégia, governança e arquitetura..."
+                            ? `Modo ${promptModes.find(m => m.id === activeMode)?.label} ativado. Digite sua pergunta...`
+                            : "Digite sua pergunta..."
                         }
-                        className="flex-1 px-4 py-3 border-2 border-emerald-200 rounded-xl focus:outline-none focus:border-emerald-500 resize-none transition-colors"
+                        className="flex-1 px-4 py-3 border border-emerald-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 resize-none transition-all bg-white/50 backdrop-blur-sm placeholder:text-slate-400 text-sm"
                         rows={2}
                         disabled={isLoading}
                     />

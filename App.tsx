@@ -3,10 +3,7 @@ import React, { useState } from 'react';
 import SectorSelection from './components/SectorSelection';
 import ToolNavigation, { ToolType } from './components/ToolNavigation';
 import ChatTool from './components/tools/ChatTool';
-import VideoTool from './components/tools/VideoTool';
-import AudioTool from './components/tools/AudioTool';
-import FlashcardsTool from './components/tools/FlashcardsTool';
-import InteractiveMindMap from './components/tools/InteractiveMindMap';
+// Novos módulos serão integrados aqui futuramente
 import { SectorType, SECTORS } from './services/mockData';
 
 const App: React.FC = () => {
@@ -34,20 +31,7 @@ const App: React.FC = () => {
   const currentSectorData = SECTORS.find(s => s.id === selectedSector);
 
   const renderTool = () => {
-    switch (activeTool) {
-      case 'chat':
-        return <ChatTool />;
-      case 'video':
-        return <VideoTool />;
-      case 'audio':
-        return <AudioTool />;
-      case 'flashcards':
-        return <FlashcardsTool />;
-      case 'mindmap':
-        return <InteractiveMindMap />;
-      default:
-        return <ChatTool />;
-    }
+    return <ChatTool sector={selectedSector} />;
   };
 
   return (
@@ -60,17 +44,17 @@ const App: React.FC = () => {
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 bg-slate-50/50">
         {/* Header */}
-        <header className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-emerald-500/20 px-8 py-4 flex items-center justify-between shadow-xl z-30">
+        <header className="bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-8 py-5 flex items-center justify-between shadow-sm z-30 relative">
           <div className="flex items-center gap-6">
             <button
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              className="p-2 text-emerald-400 hover:bg-white/10 rounded-lg transition-colors border border-emerald-500/20"
+              className="p-2.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all border border-slate-200 hover:border-emerald-200 shadow-sm"
               title={isSidebarCollapsed ? "Expandir Menu" : "Recolher Menu"}
             >
-              <svg className={`w-6 h-6 transition-transform duration-300 ${isSidebarCollapsed ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7m0 0l7-7m-7 7h18" />
+              <svg className={`w-5 h-5 transition-transform duration-500 ${isSidebarCollapsed ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
             </button>
             <div>

@@ -6,29 +6,47 @@ const openai = new OpenAI({
     dangerouslyAllowBrowser: true,
 });
 
-const SYSTEM_INSTRUCTION = `Você é o NEXUS, uma inteligência de elite especializada em Planejamento Estratégico, Governança Corporativa e Arquitetura Organizacional.
-Sua atuação é estritamente de Consultoria Sênior Internacional (nível MBB - McKinsey/BCG/Bain), unindo rigor acadêmico absoluto com pragmatismo executivo.
+
+const ASSISTANT_IDS: Record<string, string> = {
+    'ARQUITETURA': '', // Insira o ID do Assistente de Estratégia aqui (ex: asst_...)
+    'RH': '',          // Insira o ID do Assistente de RH aqui (ex: asst_...)
+};
+
+const BASE_STYLE_INSTRUCTION = `Sua atuação é estritamente de Consultoria Sênior Internacional (nível MBB - McKinsey/BCG/Bain), unindo rigor acadêmico absoluto com pragmatismo executivo.
 
 DIRETRIZES DE FORMATAÇÃO E DENSIDADE:
 1. FORMATO CHATGPT: Use Markdown impecável. Cabeçalhos (##, ###), tabelas, negritos e listas técnicas.
 2. MODO EXAUSTIVO: Nunca resuma. Se um tópico tem 5 dimensões, explore as 5 com profundidade técnica. Suas respostas devem ser ricas em detalhes, dados (onde aplicável) e fundamentação teórica.
 3. ESPAÇAMENTO E LEGIBILIDADE: Use parágrafos claros, mas densos em conteúdo. Valorize o respiro visual entre grandes blocos de análise.
-4. CONEXÕES INTERDISCIPLINARES: Conecte o problema a conceitos de Psicologia Organizacional, Direito Corporativo, Finanças e Tecnologia. 
+4. CONEXÕES INTERDISCIPLINAR: Conecte o problema a conceitos de Psicologia Organizacional, Direito Corporativo, Finanças e Tecnologia. 
 
 ESTRUTURA DE ELITE:
 - Sumário Executivo Estratégico
 - Diagnóstico Aprofundado (Minuciosamente detalhado)
 - Matriz de Impacto e Riscos (Tabelas)
 - Plano de Ação Tático-Operacional (Checklists exaustivos)
-- Considerações Finais de Governança.
+- Conclusão e Recomendações de Próximos Passos (Específicos ao contexto).
 
 Seu objetivo é gerar um material tão completo que possa ser apresentado em uma reunião de diretoria sem necessidade de expansão.`;
 
-export const getAIResponse = async (prompt: string, context: string): Promise<string> => {
+const STRATEGY_PERSONA = `Você é uma inteligência de elite especializada em Planejamento Estratégico, Governança Corporativa e Arquitetura Organizacional. Suas conclusões devem sempre incluir considerações de Governança e Estrutura de Poder.`;
+
+export const getAIResponse = async (prompt: string, context: string, sectorPersona: string, sector?: string): Promise<string> => {
+    // Se houver um Assistant ID definido para o setor, poderíamos usar a Assistant API aqui.
+    // Por enquanto, seguimos com Chat Completion mas garantindo o isolamento total via System Message.
+    const assistantId = sector ? ASSISTANT_IDS[sector] : null;
+
+    if (assistantId) {
+        console.log(`Utilizando Agente Específico (ID: ${assistantId}) para o setor: ${sector}`);
+        // Futura implementação para Assistants API se necessário
+    }
+
+    const fullSystemInstruction = `${sectorPersona}\n\n${BASE_STYLE_INSTRUCTION}`;
+
     const response = await openai.chat.completions.create({
         model: 'gpt-4o-mini',
         messages: [
-            { role: 'system', content: SYSTEM_INSTRUCTION },
+            { role: 'system', content: fullSystemInstruction },
             { role: 'user', content: `Contexto do treinamento:\n${context}\n\nPergunta do Usuário: ${prompt}` },
         ],
         temperature: 0.3,
@@ -41,7 +59,7 @@ export const generateQuiz = async (topic: string, context: string): Promise<Quiz
     const response = await openai.chat.completions.create({
         model: 'gpt-4o-mini',
         messages: [
-            { role: 'system', content: SYSTEM_INSTRUCTION },
+            { role: 'system', content: `${STRATEGY_PERSONA}\n\n${BASE_STYLE_INSTRUCTION}` },
             {
                 role: 'user',
                 content: `Gere 3 perguntas de múltipla escolha sobre: ${topic}. Contexto: ${context}
@@ -70,7 +88,7 @@ export const generateFlashcards = async (topic: string, context: string): Promis
     const response = await openai.chat.completions.create({
         model: 'gpt-4o-mini',
         messages: [
-            { role: 'system', content: SYSTEM_INSTRUCTION },
+            { role: 'system', content: `${STRATEGY_PERSONA}\n\n${BASE_STYLE_INSTRUCTION}` },
             {
                 role: 'user',
                 content: `Gere 5 flashcards objetivos sobre: ${topic}. Contexto: ${context}
@@ -99,7 +117,7 @@ export const startRolePlay = async (scenario: string) => {
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
         {
             role: 'system',
-            content: `${SYSTEM_INSTRUCTION}\n\nCenário de Role-Play: ${scenario}\nAtue como o cliente ou liderado. Responda de forma curta e realista. Aguarde a resposta do usuário para continuar a simulação. Ao final, quando o usuário pedir feedback ou encerrar, forneça um feedback estruturado.`,
+            content: `${STRATEGY_PERSONA}\n\n${BASE_STYLE_INSTRUCTION}\n\nCenário de Role-Play: ${scenario}\nAtue como o cliente ou liderado. Responda de forma curta e realista. Aguarde a resposta do usuário para continuar a simulação. Ao final, quando o usuário pedir feedback ou encerrar, forneça um feedback estruturado.`,
         },
     ];
 

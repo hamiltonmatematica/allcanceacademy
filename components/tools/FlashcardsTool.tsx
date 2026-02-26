@@ -1,45 +1,30 @@
 import React, { useState, useEffect } from 'react';
+import { SectorType, GET_FLASHCARDS_DATA } from '../../services/mockData';
 
 interface Flashcard {
-    question: string;
-    answer: string;
+    id: string;
+    front: string;
+    back: string;
 }
 
-const FlashcardsTool: React.FC = () => {
+interface FlashcardsToolProps {
+    sector: SectorType;
+}
+
+const FlashcardsTool: React.FC<FlashcardsToolProps> = ({ sector }) => {
     const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Load CSV
-        fetch('/flashcards.csv')
-            .then((response) => response.text())
-            .then((csvText) => {
-                const lines = csvText.split('\n');
-                const cards: Flashcard[] = lines
-                    .filter((line) => line.trim())
-                    .map((line) => {
-                        // Parse CSV line (handling quoted fields)
-                        const match = line.match(/^"?([^"]*)"?,"?([^"]*)"?$/);
-                        if (match) {
-                            return {
-                                question: match[1].replace(/^"|"$/g, '').trim(),
-                                answer: match[2].replace(/^"|"$/g, '').trim(),
-                            };
-                        }
-                        return null;
-                    })
-                    .filter((card): card is Flashcard => card !== null);
-
-                setFlashcards(cards);
-                setLoading(false);
-            })
-            .catch((error) => {
-                console.error('Error loading flashcards:', error);
-                setLoading(false);
-            });
-    }, []);
+        setLoading(true);
+        const data = GET_FLASHCARDS_DATA(sector);
+        setFlashcards(data);
+        setCurrentIndex(0);
+        setIsFlipped(false);
+        setLoading(false);
+    }, [sector]);
 
     const handleNext = () => {
         setIsFlipped(false);
@@ -73,14 +58,13 @@ const FlashcardsTool: React.FC = () => {
     if (!flashcards.length) {
         return (
             <div className="h-full flex items-center justify-center bg-gradient-to-br from-emerald-50 to-teal-50">
-                <p className="text-slate-600">Nenhum flashcard encontrado.</p>
+                <p className="text-slate-600">Nenhum flashcard encontrado para este setor.</p>
             </div>
         );
     }
 
     const currentCard = flashcards[currentIndex];
 
-    // Safeguard against undefined card to prevent crash
     if (!currentCard) {
         return (
             <div className="h-full flex items-center justify-center bg-gradient-to-br from-emerald-50 to-teal-50">
@@ -92,10 +76,9 @@ const FlashcardsTool: React.FC = () => {
     return (
         <div className="h-full flex flex-col bg-gradient-to-br from-emerald-50 to-teal-50 overflow-hidden">
             <div className="h-full overflow-y-auto p-8">
-                {/* Header inside scrollable area */}
                 <div className="pb-6 border-b border-emerald-200 mb-8">
                     <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">
-                        Flashcards - Gestão & Estratégia
+                        Flashcards - {sector === 'RH' ? 'Nexus HR' : 'Gestão & Estratégia'}
                     </h2>
                     <p className="text-sm text-slate-600 mt-2">
                         {flashcards.length} cards • {currentIndex + 1} de {flashcards.length}
@@ -103,52 +86,48 @@ const FlashcardsTool: React.FC = () => {
                 </div>
 
                 <div className="flex flex-col items-center justify-center pb-12">
-                    {/* Flashcard */}
                     <div
                         className="w-full max-w-2xl h-96 cursor-pointer flex-shrink-0"
-                        style={{ perspective: '1000px' }} // Inline perspective for safety
+                        style={{ perspective: '1000px' }}
                         onClick={handleFlip}
                     >
                         <div
                             className={`relative w-full h-full transition-transform duration-500`}
                             style={{
                                 transformStyle: 'preserve-3d',
-                                WebkitTransformStyle: 'preserve-3d', // Safari support
+                                WebkitTransformStyle: 'preserve-3d',
                                 transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
                             }}
                         >
-                            {/* Front */}
                             <div
                                 className="absolute w-full h-full bg-gradient-to-br from-emerald-500 to-teal-600 rounded-3xl shadow-2xl p-12 flex flex-col items-center justify-center"
                                 style={{
                                     backfaceVisibility: 'hidden',
-                                    WebkitBackfaceVisibility: 'hidden' // Safari support
+                                    WebkitBackfaceVisibility: 'hidden'
                                 }}
                             >
                                 <div className="text-sm font-semibold text-emerald-100 mb-4">PERGUNTA</div>
                                 <p className="text-white text-2xl font-bold text-center leading-relaxed">
-                                    {currentCard.question}
+                                    {currentCard.front}
                                 </p>
                                 <div className="mt-8 text-emerald-100 text-sm">Clique para ver a resposta</div>
                             </div>
 
-                            {/* Back */}
                             <div
                                 className="absolute w-full h-full bg-gradient-to-br from-green-600 to-emerald-700 rounded-3xl shadow-2xl p-12 flex flex-col items-center justify-center"
                                 style={{
                                     backfaceVisibility: 'hidden',
-                                    WebkitBackfaceVisibility: 'hidden', // Safari support
+                                    WebkitBackfaceVisibility: 'hidden',
                                     transform: 'rotateY(180deg)',
                                 }}
                             >
                                 <div className="text-sm font-semibold text-green-100 mb-4">RESPOSTA</div>
-                                <p className="text-white text-xl text-center leading-relaxed">{currentCard.answer}</p>
+                                <p className="text-white text-xl text-center leading-relaxed">{currentCard.back}</p>
                                 <div className="mt-8 text-green-100 text-sm">Clique para voltar</div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Navigation */}
                     <div className="flex items-center gap-6 mt-12 flex-shrink-0">
                         <button
                             onClick={(e) => {
@@ -179,10 +158,6 @@ const FlashcardsTool: React.FC = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                             </svg>
                         </button>
-                    </div>
-
-                    <div className="mt-8 text-center text-emerald-800/60">
-                        <p>Role para baixo se necessário</p>
                     </div>
                 </div>
             </div>
