@@ -35,7 +35,15 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
+    <div className="flex h-screen w-full bg-slate-50 overflow-hidden relative">
+      {/* Mobile Backdrop */}
+      {!isSidebarCollapsed && (
+        <div
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-30 lg:hidden transition-opacity"
+          onClick={() => setIsSidebarCollapsed(true)}
+        />
+      )}
+
       {/* Tool Navigation Sidebar */}
       <ToolNavigation
         activeTool={activeTool}
@@ -44,34 +52,35 @@ const App: React.FC = () => {
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 bg-slate-50/50">
+      <div className="flex-1 flex flex-col min-w-0 bg-slate-50/50 relative">
         {/* Header */}
-        <header className="bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-8 py-5 flex items-center justify-between shadow-sm z-30 relative">
-          <div className="flex items-center gap-6">
+        <header className="bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-4 md:px-8 py-4 md:py-5 flex items-center justify-between shadow-sm z-20 relative">
+          <div className="flex items-center gap-3 md:gap-6">
             <button
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              className="p-2.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all border border-slate-200 hover:border-emerald-200 shadow-sm"
+              className="p-2 md:p-2.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all border border-slate-200 hover:border-emerald-200 shadow-sm"
               title={isSidebarCollapsed ? "Expandir Menu" : "Recolher Menu"}
             >
               <svg className={`w-5 h-5 transition-transform duration-500 ${isSidebarCollapsed ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
             </button>
-            <div>
-              <h1 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">
+            <div className="min-w-0">
+              <h1 className="text-base md:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400 truncate max-w-[150px] md:max-w-none">
                 {currentSectorData?.label}
               </h1>
-              <p className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold">
-                Plataforma MentorIA - {activeTool.toUpperCase()}
+              <p className="hidden xs:block text-[9px] md:text-[10px] text-slate-400 uppercase tracking-widest font-semibold truncate">
+                MentorIA - {activeTool.toUpperCase()}
               </p>
             </div>
           </div>
 
           <button
             onClick={handleBackToSectors}
-            className="group flex items-center gap-3 px-6 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl hover:shadow-2xl hover:shadow-emerald-500/30 transition-all hover:scale-105"
+            className="group flex items-center gap-2 md:gap-3 px-3 md:px-6 py-2 md:py-2.5 text-[10px] md:text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl hover:shadow-2xl hover:shadow-emerald-500/30 transition-all hover:scale-105"
           >
-            Trocar Setor
+            <span className="hidden sm:inline">Trocar Setor</span>
+            <span className="sm:hidden">Sair</span>
           </button>
         </header>
 

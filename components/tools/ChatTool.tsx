@@ -151,13 +151,13 @@ const ChatTool: React.FC<ChatToolProps> = ({ sector }) => {
         <div className="h-full flex flex-col bg-gradient-to-br from-emerald-50 to-teal-50 overflow-hidden">
 
             {/* Messages Area with Header embedded */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6 premium-scroll">
+            <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 premium-scroll">
                 {/* Header inside scrollable area */}
                 <div className="pb-6 border-b border-emerald-200 mb-6">
-                    <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">
+                    <h2 className="text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">
                         {sectorData?.label}
                     </h2>
-                    <p className="text-sm text-slate-600 mt-2">
+                    <p className="text-xs md:text-sm text-slate-600 mt-2">
                         {sector === 'RH'
                             ? 'Inteligência Estratégica em Sistemas Humanos, Gestão Horizontal e Saúde Organizacional'
                             : 'Consultoria Sênior em Planejamento, Governança e Arquitetura Organizacional'}
@@ -170,7 +170,7 @@ const ChatTool: React.FC<ChatToolProps> = ({ sector }) => {
                         className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} animate-premium-in`}
                     >
                         <div
-                            className={`max-w-[85%] rounded-2xl px-6 py-5 shadow-sm border ${message.role === 'user'
+                            className={`max-w-[95%] md:max-w-[85%] rounded-2xl px-5 py-4 md:px-6 md:py-5 shadow-sm border ${message.role === 'user'
                                 ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-emerald-500/20 shadow-emerald-500/10'
                                 : 'bg-white text-slate-800 border-slate-100 shadow-slate-200/50'
                                 }`}
@@ -207,7 +207,7 @@ const ChatTool: React.FC<ChatToolProps> = ({ sector }) => {
             </div>
 
             {/* Input Area */}
-            <div className="p-6 border-t border-emerald-500/10 glass-effect relative z-20">
+            <div className="p-4 md:p-6 border-t border-emerald-500/10 glass-effect relative z-20">
 
                 {/* Prompt Modes Selection */}
                 <div className="flex flex-wrap gap-2 mb-4">
@@ -232,7 +232,7 @@ const ChatTool: React.FC<ChatToolProps> = ({ sector }) => {
                         onChange={(e) => setInput(e.target.value)}
                         onKeyPress={handleKeyPress}
                         placeholder={activeMode
-                            ? `Modo ${promptModes.find(m => m.id === activeMode)?.label} ativado. Digite sua pergunta...`
+                            ? `Modo ${promptModes.find(m => m.id === activeMode)?.label} ativado...`
                             : "Digite sua pergunta..."
                         }
                         className="flex-1 px-4 py-3 border border-emerald-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 resize-none transition-all bg-white/50 backdrop-blur-sm placeholder:text-slate-400 text-sm"
@@ -242,7 +242,7 @@ const ChatTool: React.FC<ChatToolProps> = ({ sector }) => {
                     <button
                         onClick={handleSend}
                         disabled={!input.trim() || isLoading}
-                        className="px-8 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl hover:shadow-xl hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                        className="px-5 md:px-8 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl hover:shadow-xl hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                     >
                         <svg
                             className="w-6 h-6"

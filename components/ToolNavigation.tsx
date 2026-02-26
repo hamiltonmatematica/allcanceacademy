@@ -24,8 +24,9 @@ const ToolNavigation: React.FC<ToolNavigationProps> = ({ activeTool, onToolChang
 
     return (
         <div className={`
-            ${isCollapsed ? 'w-20' : 'w-72'} 
-            bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col h-full shadow-2xl border-r border-emerald-500/20 transition-all duration-300 overflow-hidden
+            fixed lg:relative z-40 h-full
+            ${isCollapsed ? 'w-20 -translate-x-full lg:translate-x-0' : 'w-[280px] lg:w-72 translate-x-0'} 
+            bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col shadow-2xl border-r border-emerald-500/20 transition-all duration-300 overflow-hidden
         `}>
             {/* Header */}
             <div className={`p-6 border-b border-emerald-500/20 ${isCollapsed ? 'items-center flex flex-col' : ''}`}>
